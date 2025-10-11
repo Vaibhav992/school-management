@@ -6,14 +6,21 @@ const UserCard = async ({
 }: {
   type: "admin" | "teacher" | "student" | "parent";
 }) => {
-  const modelMap: Record<typeof type, any> = {
-    admin: prisma.admin,
-    teacher: prisma.teacher,
-    student: prisma.student,
-    parent: prisma.parent,
-  };
+  let data = 0;
+  
+  try {
+    const modelMap: Record<typeof type, any> = {
+      admin: prisma.admin,
+      teacher: prisma.teacher,
+      student: prisma.student,
+      parent: prisma.parent,
+    };
 
-  const data = await modelMap[type].count();
+    data = await modelMap[type].count();
+  } catch (error) {
+    console.error(`Error fetching ${type} count:`, error);
+    data = 0;
+  }
 
   return (
     <div className="rounded-2xl odd:bg-lamaPurple even:bg-lamaYellow p-4 flex-1 min-w-[130px]">

@@ -3,25 +3,37 @@ import AttendanceChart from "./AttendanceChart";
 import prisma from "@/lib/prisma";
 
 const AttendanceChartContainer = async () => {
-  const today = new Date();
-  const dayOfWeek = today.getDay();
-  const daysSinceMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+  let resData: { date: Date; present: boolean }[] = [];
 
-  const lastMonday = new Date(today);
+  try {
+    // Check if we're in a build environment
+    if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
+      console.log('No database URL in production build, using empty data');
+      resData = [];
+    } else {
+      const today = new Date();
+      const dayOfWeek = today.getDay();
+      const daysSinceMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
 
-  lastMonday.setDate(today.getDate() - daysSinceMonday);
+      const lastMonday = new Date(today);
+      lastMonday.setDate(today.getDate() - daysSinceMonday);
 
-  const resData = await prisma.attendance.findMany({
-    where: {
-      date: {
-        gte: lastMonday,
-      },
-    },
-    select: {
-      date: true,
-      present: true,
-    },
-  });
+      resData = await prisma.attendance.findMany({
+        where: {
+          date: {
+            gte: lastMonday,
+          },
+        },
+        select: {
+          date: true,
+          present: true,
+        },
+      });
+    }
+  } catch (error) {
+    console.error('Error fetching attendance data:', error);
+    resData = [];
+  }
 
   // console.log(data)
 
@@ -36,20 +48,24 @@ const AttendanceChartContainer = async () => {
       Fri: { present: 0, absent: 0 },
     };
 
-  resData.forEach((item) => {
-    const itemDate = new Date(item.date);
-    const dayOfWeek = itemDate.getDay();
-    
-    if (dayOfWeek >= 1 && dayOfWeek <= 5) {
-      const dayName = daysOfWeek[dayOfWeek - 1];
+  try {
+    resData.forEach((item) => {
+      const itemDate = new Date(item.date);
+      const dayOfWeek = itemDate.getDay();
+      
+      if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+        const dayName = daysOfWeek[dayOfWeek - 1];
 
-      if (item.present) {
-        attendanceMap[dayName].present += 1;
-      } else {
-        attendanceMap[dayName].absent += 1;
+        if (item.present) {
+          attendanceMap[dayName].present += 1;
+        } else {
+          attendanceMap[dayName].absent += 1;
+        }
       }
-    }
-  });
+    });
+  } catch (error) {
+    console.error('Error processing attendance data:', error);
+  }
 
   const data = daysOfWeek.map((day) => ({
     name: day,
