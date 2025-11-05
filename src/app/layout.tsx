@@ -8,7 +8,7 @@ import "react-toastify/dist/ReactToastify.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Anurag School Management Dashboard",
+  title: "V-SCHOOL Management Dashboard",
   description: "Next.js School Management System",
 };
 

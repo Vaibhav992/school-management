@@ -1,28 +1,36 @@
 import prisma from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
+import { Announcement } from "@prisma/client";
 
 const Announcements = async () => {
-  const { userId, sessionClaims } = auth();
-  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  let data: Announcement[] = [];
+  
+  try {
+    const { userId, sessionClaims } = auth();
+    const role = (sessionClaims?.metadata as { role?: string })?.role;
 
-  const roleConditions = {
-    teacher: { lessons: { some: { teacherId: userId! } } },
-    student: { students: { some: { id: userId! } } },
-    parent: { students: { some: { parentId: userId! } } },
-  };
+    const roleConditions = {
+      teacher: { lessons: { some: { teacherId: userId! } } },
+      student: { students: { some: { id: userId! } } },
+      parent: { students: { some: { parentId: userId! } } },
+    };
 
-  const data = await prisma.announcement.findMany({
-    take: 3,
-    orderBy: { date: "desc" },
-    where: {
-      ...(role !== "admin" && {
-        OR: [
-          { classId: null },
-          { class: roleConditions[role as keyof typeof roleConditions] || {} },
-        ],
-      }),
-    },
-  });
+    data = await prisma.announcement.findMany({
+      take: 3,
+      orderBy: { date: "desc" },
+      where: {
+        ...(role !== "admin" && {
+          OR: [
+            { classId: null },
+            { class: roleConditions[role as keyof typeof roleConditions] || {} },
+          ],
+        }),
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching announcements:', error);
+    data = [];
+  }
 
   return (
     <div className="bg-white p-4 rounded-md">

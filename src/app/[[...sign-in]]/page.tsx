@@ -32,7 +32,7 @@ const LoginPage = () => {
         >
           <h1 className="text-xl font-bold flex items-center gap-2">
             <Image src="/logo.png" alt="" width={24} height={24} />
-            SchoolAnurag
+            V-SCHOOL
           </h1>
           <h2 className="text-gray-400">Sign in to your account</h2>
           <Clerk.GlobalError className="text-sm text-red-400" />
@@ -66,7 +66,7 @@ const LoginPage = () => {
           </SignIn.Action>
           <div className="text-center mt-4">
             <p className="text-xs text-gray-400">
-              Made by <span className="font-semibold text-gray-600"> ❤Anurag</span>
+              Made by <span className="font-semibold text-gray-600"> ❤V-SCHOOL</span>
             </p>
           </div>
         </SignIn.Step>
